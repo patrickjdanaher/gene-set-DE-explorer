@@ -5,6 +5,7 @@
 #'
 #' @param ests A vector of parameter estimates for each gene
 #' @param pvals A vector of the p-values from each gene
+#' @param fdrs A vector of False Discovery Rate values. If not give, p.adjust is used with method = "BH"
 #' @param names A vector 
 #' @param fdr.lines A vector of FDR values at which to draw lines
 #' @param show.names.top.N An integer: show the gene names for the top N p-values
@@ -20,7 +21,7 @@
 #' @param ... Arguments passed to plot()
 #' @return A volcano plot. 
 #' @export
-volcplot = function(ests, pvals, names, fdr.lines = c(0.05, 0.5),
+volcplot = function(ests, pvals, fdrs, names, fdr.lines = c(0.05, 0.5),
                     show.names.top.N = 100, show.names.pval.thresh = NULL, show.names.fdr.thresh = NULL,
                     color.top.up = "firebrick", color.top.dn = "darkblue", xlab = "Estimate",
                     cex.points = 0.5, cex.genenames = 0.5, cex.legend = 0.5, ...){
@@ -31,8 +32,10 @@ volcplot = function(ests, pvals, names, fdr.lines = c(0.05, 0.5),
   no.valid.name = union(which(is.na(names)), which(gsub(" ","",names) == ""))
   names[no.valid.name] = paste0("gene", no.valid.name)
   
-  # calc FDR:
-  fdrs = p.adjust(pvals, "BH")
+  # calc FDRs if not provided:
+  if (length(fdrs) == 0){
+    fdrs = p.adjust(pvals, "BH")
+  }
   # get p-values corresponding to those FDR cutoffs:
   fdr.line.positions = c()
   if (length(fdr.lines) > 0){
