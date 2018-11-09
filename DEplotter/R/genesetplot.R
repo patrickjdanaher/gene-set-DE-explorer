@@ -8,19 +8,15 @@
 #' @param names A vector 
 #' @param genesets A character matrix of gene set/ gene name key value pairs, 
 #'                 with 2 columns, the first giving gene set name and the second giving gene name.
+#'                 Defaults to KEGG pathways, which is loaded with the package.
 #' @param fdr.lines A vector of FDR values at which to draw lines
-#' @param show.names.top.N An integer: show the gene names for the top N p-values
-#' @param show.names.pval.thresh A value in (0,1): show names for all genes below this p-value
-#' @param show.names.fdr.thresh A value in (0,1): show names for all genes below this FDR
-#' @param color.top.up The color with which to show the names of the top up-regulated genes
-#' @param color.top.dn The color with which to show the names of the top down-regulated genes
-#' @param xlab The horizontal axis label
-#' @param cex.points The size of the points in the plot
+#' @param color.genes.up The color with which to show the names of the up-regulated genes
+#' @param color.genes.dn The color with which to show the names of the down-regulated genes
+#' @param color.background.up 
+#' @param color.background.dn 
 #' @param cex.genenames The size of the genenames in the plot
-#' @param cex.legend The size of the legend detailing the FDR cutoffs
 #' 
-#' @param ... Arguments passed to plot()
-#' @return A volcano plot. 
+#' @return A plot of gene sets. 
 #' @export
 genesetplot = function(ests, pvals, names, fdr.lines = c(0.05, 0.5),
                     show.names.top.N = 100, show.names.pval.thresh = NULL, show.names.fdr.thresh = NULL,

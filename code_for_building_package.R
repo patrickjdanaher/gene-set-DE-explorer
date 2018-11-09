@@ -33,4 +33,7 @@ ReadLossPlotter::launchApp()
 
 #** ---> try it out!
 
+#**- geneset plotter: format genesets object the same way as msigdb downloads
+#**- geneset plotter: provide args for controlling which gene sets go in there
+
 
