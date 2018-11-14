@@ -8,6 +8,7 @@
 #### package building code: from https://hilaryparker.com/2014/04/29/writing-an-r-package-from-scratch/
 
 
+
 library("devtools")
 library(roxygen2)
 
@@ -37,3 +38,26 @@ ReadLossPlotter::launchApp()
 #**- geneset plotter: provide args for controlling which gene sets go in there
 
 
+##### code for exploring EGSEAdata datasets
+# note: pathways available in library("EGSEAdata"); DOI:10.18129/B9.bioc.EGSEAdata 
+library(EGSEAdata)
+
+??`EGSEAdata-package`
+??EGSEAdata
+egsea.data()
+?gsetdb.human
+?kegg.pathways
+?msigdb
+
+objs = c("gsetdb.human", "kegg.pathways", "msigdb")
+for(o in objs){
+  print((get(o)[[1]][[1]]))
+}
+
+## structure we atually want: just a longform df: columns are: species, database name, gene set name, gene name
+# (or each geneset could be a list, and a separate lookup table could have species and database-relevant info (and maybe even num. genes))
+# basic user goals:
+# - try out different thematic genesets
+# - 
+
+### simpler alternative: just provide KEGG with an easy format; let user add own if they want
