@@ -61,3 +61,8 @@ for(o in objs){
 # - 
 
 ### simpler alternative: just provide KEGG with an easy format; let user add own if they want
+#
+
+### would also be nice to have some plots generally comparing gene sets for how interesting they are...
+#. e.g. return the most significant, the most up, most down...
+

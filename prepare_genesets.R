@@ -2,3 +2,8 @@
 
 
 ## get KEGG human:
+names(kegg.pathways)
+
+names(kegg.pathways[["human"]][["kg.sets"]])
+str(kegg.pathways[["human"]][["kg.sets"]])
+str(kegg.pathways[["human"]][["kg.sets"]][[1]])
