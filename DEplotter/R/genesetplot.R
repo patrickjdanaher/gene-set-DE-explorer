@@ -12,7 +12,8 @@
 #' @param min.geneset.size Minimum number of genes for a geneset to have in order to be considered
 #' @param min.geneset.coverage A number in (0,1) - excluded gene sets without at least this many of their genes present in the data
 #' @param mandatory.genesets Character vector of gene set names to include
-#' @param geneset.ranking.method One of "most.significant", "most.unidirectional".
+#' @param geneset.ranking.method One of "most.significant", "most.unidirectional" (extremely up- or down-regulated genesets),
+#'        "most.sig.in.each.direction" (get the most significant up- and down-regulated genesets)
 #' @param fdr.lines A vector of FDR values at which to draw lines
 #' @param color.genes.up The color with which to show the names of the up-regulated genes
 #' @param color.genes.dn The color with which to show the names of the down-regulated genes
@@ -31,9 +32,60 @@ genesetplot = function(ests, pvals, names, genesets,
                        xlab = "Estimate",
                        cex.points = 0.5, cex.genenames = 0.5, cex.legend = 0.5, ...){
   
-  ## choose which genesets to plot:
+  ## take intersection of genesets with data:
+  for (gsname in setdiff(names(genesets), mandatory.genesets)){
+    # exclude genesets with too little intersection with data:
+    if (length(intersect(genesets[[gsname]], names)) / length(genesets[[gsname]]) < min.geneset.coverage){
+      genesets[[gsname]] = NULL
+    }
+    # only keep the intersection:
+    genesets[[gsname]] = intersect(genesets[[gsname]], names)
+  }
   
+  ## exclude genesets with insufficient genes
+  for (gsname in setdiff(names(genesets), mandatory.genesets)){
+    # exclude genesets with too little intersection with data:
+    if (length(genesets[[gsname]] < min.geneset.size){
+      genesets[[gsname]] = NULL
+    }
+  }
+  
+  ## choose which genesets to plot:
+  scores = c()
+  if (geneset.ranking.method == "most.significant"){
+    for (gsname in names(genesets)){
+      tempgenes = genesets[[gsname]]
+      scores[gsname] = mean(-log10(pvals[tempgenes]))
+    }
+  }
+  if (geneset.ranking.method == "most.unidirectional"){
+    for (gsname in names(genesets)){
+      tempgenes = genesets[[gsname]]
+      uppvals = -log10(replace(pvals[tempgenes], ests[tempgenes] < 0, 1))
+      dnpvals = -log10(replace(pvals[tempgenes], ests[tempgenes] > 0, 1))
+      scores[gsname] = max(mean(uppvals), mean(dnpvals))
+    }
+  }
+  if (geneset.ranking.method == "most.sig.in.each.direction"){
+    upscores = c()
+    dnscores = c()
+    for (gsname in names(genesets)){
+      tempgenes = genesets[[gsname]]
+      uppvals = -log10(replace(pvals[tempgenes], ests[tempgenes] < 0, 1))
+      dnpvals = -log10(replace(pvals[tempgenes], ests[tempgenes] > 0, 1))
+      upscores[gsname] = mean(uppvals)
+      dnscores[name] = mean(dnpvals)
+    }
+    # score each geneset by whichever is more impressive: its rank in the up-regulated scores or among the dn-regulated scores
+    scores = apply(cbind(rank(upscores), rank(dnscores)), 1, max)
+  }
+  
+  ## which genesets to plot: any mandatory, plus any additional in decreasing order of score up to n.genesets
+  show = c(mandatory.genesets, names(genesets)[order(scores, decreasing = T)])
+  show = show[max(length(mandatory.genesets), n.genesets)]
   
   ## draw the plot:
+  
+  
   
 }
