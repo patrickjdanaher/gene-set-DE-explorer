@@ -29,9 +29,12 @@ genesetplot = function(ests, pvals, names, genesets,
                        fdr.lines = c(0.05, 0.5),
                        color.genes.up = "firebrick", color.genes.dn = "darkblue", 
                        color.background.up = rgb(1,0,0,0.2), color.background.dn = rgb(0,0,1,0.2),
-                       xlab = "Estimate",
+                       xlab = "Estimate", ylim = NULL, 
                        cex.points = 0.5, cex.genenames = 0.5, cex.legend = 0.5, ...){
-  
+  ## name ests and pvals with gene names:
+  if (length(names) > 0){
+    names(ests) = names(pvals) = names
+  }
   ## take intersection of genesets with data:
   for (gsname in setdiff(names(genesets), mandatory.genesets)){
     # exclude genesets with too little intersection with data:
@@ -45,7 +48,7 @@ genesetplot = function(ests, pvals, names, genesets,
   ## exclude genesets with insufficient genes
   for (gsname in setdiff(names(genesets), mandatory.genesets)){
     # exclude genesets with too little intersection with data:
-    if (length(genesets[[gsname]] < min.geneset.size){
+    if (length(genesets[[gsname]]) < min.geneset.size){
       genesets[[gsname]] = NULL
     }
   }
@@ -84,8 +87,40 @@ genesetplot = function(ests, pvals, names, genesets,
   show = c(mandatory.genesets, names(genesets)[order(scores, decreasing = T)])
   show = show[max(length(mandatory.genesets), n.genesets)]
   
+  # parse the ylim: take what's been given, or if NULL, get the range of the available ones
+  if (length(ylim) == 0){
+    # get all relevant pvals to find their range:
+    temp = c()
+    for (name in show){
+      temp = c(temp, pvals[match(genesets[[name]], names)])
+      ylim = c(0, -log10(min(temp, na.rm = T)))
+    }
+  }
   ## draw the plot:
-  
-  
-  
+  bp = barplot(rep(0, length(show)), xaxt = "n", ylab = "-log10(p-value)", main = "", col = 0, outline = 0, ylim = ylim)
+  # for each geneset, calculate the mean -log10(pval) of the negative and positive genes
+  means.neg = means.pos = c()
+  for (name in show){
+    tempgenes = genesets[[name]]
+    tempgenes.neg = tempgenes[ests[tempgenes] < 0]
+    tempgenes.pos = tempgenes[ests[tempgenes] > 0]
+    means.neg[name] = mean(-log10(pvals[tempgenes.neg]))
+    means.pos[name] = mean(-log10(pvals[tempgenes.pos]))
+  }
+  # draw boxes for mean -log10pvals in up vs. down genes:
+  boxwidth = (bp[2] - bp[1]) / 2
+  for (i in 1:length(show)){
+    if(means.pos[i] > means.beg[i]){
+      rect(bp[i] - boxwidth, means.neg[i], bp[i] + boxwidth, means.pos[i], col = color.background.up)
+    }
+    if(means.pos[i] < means.beg[i]){
+      rect(bp[i] - boxwidth, means.pos[i], bp[i] + boxwidth, means.neg[i], col = color.background.dn)
+    }
+  }
+  # draw gene names:
+  for (i in 1:length(show)){
+    tempgenes = genesets[[name]]
+    text(rep(bp[i], length(tempgenes)), -log10(pvals[tempgenes]), cex = cex.genenames,
+         col = c(color.genes.dn, color.genes.up)[1 + (ests[tempgenes] > 0)])
+  }
 }
