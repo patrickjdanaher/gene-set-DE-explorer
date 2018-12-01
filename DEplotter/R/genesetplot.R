@@ -14,6 +14,10 @@
 #' @param mandatory.genesets Character vector of gene set names to include
 #' @param geneset.ranking.method One of "most.significant", "most.unidirectional" (extremely up- or down-regulated genesets),
 #'        "most.sig.in.each.direction" (get the most significant up- and down-regulated genesets)
+#' @param draw.volcano Logical, whether to draw a volcano plot alongside it. If this is selected,
+#'        then various formatting choices will be made with layout() and par()$mar.
+#' @param volcano.to.geneset.width.ratio A number in (0,1), how much of the total width to devote
+#'       to the volcano plot. (Default 0.2.)
 #' @param fdr.lines A vector of FDR values at which to draw lines
 #' @param fdr.legend Logical, whether to show a legend for the FDR lines
 #' @param color.genes.up The color with which to show the names of the up-regulated genes
@@ -21,18 +25,28 @@
 #' @param color.background.up The color of background bars showing mean -log10 p-values of up-regulated genesets
 #' @param color.background.dn The color of background bars showing mean -log10 p-values of down-regulated genesets
 #' @param cex.genenames The size of the genenames in the plot
-#'
+#' @param cex.legend The size of the legend showing FDR values
+#' @param bottom.margin If not NULL, par()$mar will be reset to this.
+#' @param show.names.top.N Only used in the volcano plot. An integer: show the gene names for the
+#'        top N p-values.
+#' @param show.names.pval.thresh Only used in the volcano plot. A value in (0,1): show names
+#'        for all genes below this p-value.
+#' @param show.names.fdr.thresh Only used in the volcano plot. A value in (0,1): show names for all
+#'        genes below this FDR.
+#' @param xlab Only used in the volcano plot. The horizontal axis label for the volcano plot.
 #' @return A plot of gene sets.
 #' @export
 genesetplot = function(ests, pvals, fdrs = NULL, names, genesets,
                        n.genesets = 10, min.geneset.size = 5, min.geneset.coverage = 0.3,
                        mandatory.genesets = NULL,
                        geneset.ranking.method = "most.significant",
+                       draw.volcano = TRUE, volcano.to.geneset.width.ratio = 0.2,
                        fdr.lines = c(0.05, 0.5), fdr.legend = TRUE,
                        color.genes.up = "firebrick", color.genes.dn = "darkblue",
                        color.background.up = rgb(1,0,0,0.2), color.background.dn = rgb(0,0,1,0.2),
-                       ylim = NULL,
-                       cex.points = 0.5, cex.genenames = 0.7, cex.legend = 0.5, ...){
+                       ylim = NULL, cex.points = 0.5, cex.genenames = 0.7, cex.legend = 0.5, bottom.margin = 12,
+                       show.names.top.N = 100, show.names.pval.thresh = NULL,
+                       show.names.fdr.thresh = NULL,xlab = "Estimate"){
   ## name ests and pvals with gene names:
   if (length(names) > 0){
     names(ests) = names(pvals) = names
@@ -108,8 +122,42 @@ genesetplot = function(ests, pvals, fdrs = NULL, names, genesets,
     means.neg[name] = mean(-log10(pvals[tempgenes.neg]))
     means.pos[name] = mean(-log10(pvals[tempgenes.pos]))
   }
+
   ## draw the plot:
-  bp = barplot(means, xaxt = "n", ylab = "-log10(p-value)", main = "", col = 0, border = F, ylim = ylim) #col = rgb(0,0,0,0.4),
+
+  # save the original margins in order to revert to them:
+  mars0 = par()$mar
+
+  # if draw.volcano has been selected:
+  if (draw.volcano){
+    # lay out the plotting window:
+    layout(matrix(c(1,2),1), widths = c(volcano.to.geneset.width.ratio, 1 - volcano.to.geneset.width.ratio))
+
+    # define margins for the volcplot:
+    mars = mars0
+    if (length(bottom.margin)>0){
+      mars[1] = bottom.margin
+    }
+    mars[4] = 0.5
+    par(mar = mars)
+    # draw the volcano plot:
+    volcplot(ests = ests, pvals = pvals, fdrs = fdrs, names = names, fdr.lines = fdr.lines,
+            show.names.top.N = show.names.top.N, show.names.pval.thresh = show.names.pval.thresh,
+            show.names.fdr.thresh = show.names.fdr.thresh, xlab = xlab,
+            color.top.up = color.genes.up, color.top.dn = color.genes.dn,
+            cex.points = 0.5, cex.genenames = cex.genenames, cex.legend = 0.5, ylim = ylim)
+
+    # define margins for the geneset plot:
+    mars[2] = 0.5
+    par(mar = mars)
+
+    # disable the FDR legend for the genesetplot:
+    fdr.legend = FALSE
+  }
+
+  # draw the geneset plot:
+  bp = barplot(means, xaxt = "n", ylab = "-log10(p-value)", main = "", col = 0,
+               border = F, ylim = ylim, axes = !draw.volcano)
 
   # add FDR lines:
   if (length(fdr.lines) > 0){
@@ -157,4 +205,7 @@ genesetplot = function(ests, pvals, fdrs = NULL, names, genesets,
   if (fdr.legend & (length(fdr.lines)>0)){
     legend("bottomleft", lty = 1 + (1:length(fdr.lines)), legend = paste0("FDR = ", fdr.lines))
   }
+
+  # revert to old margins:
+  par(mar = mars0)
 }

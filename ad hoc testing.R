@@ -26,5 +26,6 @@ genesetplot(ests = ests, pvals = pvals, fdrs = NULL, names = names, genesets = g
             color.genes.up = "firebrick", color.genes.dn = "darkblue", 
             color.background.up = rgb(1,0,0,0.2), color.background.dn = rgb(0,0,1,0.2),
             xlab = "Estimate", ylim = NULL, 
-            cex.points = 0.5, cex.genenames = 0.7, cex.legend = 0.5)
+            cex.points = 0.5, cex.genenames = 0.7, cex.legend = 0.5,
+            volcano.to.geneset.width.ratio = 0.4)
   
