@@ -12,8 +12,8 @@ volcplot(ests, pvals, names = names,fdrs = fdrs,
 
 
 ## load gene sets:
-gsets = parsegenesetfile("c2.all.v6.2.symbols.gmt")
-gs2 = parsegenesetfile("c2.cp.biocarta.v6.2.symbols.gmt.txt")
+gsets = parsegenesetfile("MSigDB_datasets/c2.all.v6.2.symbols.gmt")
+gs2 = parsegenesetfile("MSigDB_datasets/c2.cp.biocarta.v6.2.symbols.gmt.txt")
 
 
 
@@ -26,5 +26,5 @@ genesetplot(ests, pvals, names, genesets = gsets,
             color.genes.up = "firebrick", color.genes.dn = "darkblue", 
             color.background.up = rgb(1,0,0,0.2), color.background.dn = rgb(0,0,1,0.2),
             xlab = "Estimate", ylim = NULL, 
-            cex.points = 0.5, cex.genenames = 0.5, cex.legend = 0.5)
+            cex.points = 0.5, cex.genenames = 0.7, cex.legend = 0.5)
   

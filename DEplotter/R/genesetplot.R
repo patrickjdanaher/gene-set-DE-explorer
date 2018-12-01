@@ -25,12 +25,13 @@
 #' @export
 genesetplot = function(ests, pvals, names, genesets,
                        n.genesets = 10, min.geneset.size = 5, min.geneset.coverage = 0.3,
-                       mandatory.genesets = NULL, geneset.ranking.method = "most.significant",
+                       mandatory.genesets = NULL,
+                       geneset.ranking.method = "most.significant",
                        fdr.lines = c(0.05, 0.5),
                        color.genes.up = "firebrick", color.genes.dn = "darkblue",
                        color.background.up = rgb(1,0,0,0.2), color.background.dn = rgb(0,0,1,0.2),
                        ylim = NULL,
-                       cex.points = 0.5, cex.genenames = 0.5, cex.legend = 0.5, ...){
+                       cex.points = 0.5, cex.genenames = 0.7, cex.legend = 0.5, ...){
   ## name ests and pvals with gene names:
   if (length(names) > 0){
     names(ests) = names(pvals) = names
@@ -107,9 +108,16 @@ genesetplot = function(ests, pvals, names, genesets,
     means.pos[name] = mean(-log10(pvals[tempgenes.pos]))
   }
   ## draw the plot:
-  bp = barplot(means, xaxt = "n", ylab = "-log10(p-value)", main = "", col = rgb(0,0,0,0.4), border = F, ylim = ylim)
+  bp = barplot(means, xaxt = "n", ylab = "-log10(p-value)", main = "", col = 0, border = F, ylim = ylim) #col = rgb(0,0,0,0.4),
+
   # draw boxes for mean -log10pvals in up vs. down genes:
   boxwidth = (bp[2] - bp[1]) / 2
+  # draw alternating background boxes:
+  for (i in 1:length(show)){
+    if (i%%2 == 0){
+        rect(bp[i] - boxwidth, ylim[1], bp[i] + boxwidth, ylim[2], col = rgb(0,0,0,0.1), border = F)
+    }
+  }
   #for (i in 1:length(show)){
   #  if(means.pos[i] > means.neg[i]){
   #    rect(bp[i] - boxwidth, means.neg[i], bp[i] + boxwidth, means.pos[i], col = color.background.up, border = F)
