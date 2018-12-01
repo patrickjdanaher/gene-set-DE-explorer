@@ -15,6 +15,7 @@
 #' @param geneset.ranking.method One of "most.significant", "most.unidirectional" (extremely up- or down-regulated genesets),
 #'        "most.sig.in.each.direction" (get the most significant up- and down-regulated genesets)
 #' @param fdr.lines A vector of FDR values at which to draw lines
+#' @param fdr.legend Logical, whether to show a legend for the FDR lines
 #' @param color.genes.up The color with which to show the names of the up-regulated genes
 #' @param color.genes.dn The color with which to show the names of the down-regulated genes
 #' @param color.background.up The color of background bars showing mean -log10 p-values of up-regulated genesets
@@ -23,11 +24,11 @@
 #'
 #' @return A plot of gene sets.
 #' @export
-genesetplot = function(ests, pvals, names, genesets,
+genesetplot = function(ests, pvals, fdrs = NULL, names, genesets,
                        n.genesets = 10, min.geneset.size = 5, min.geneset.coverage = 0.3,
                        mandatory.genesets = NULL,
                        geneset.ranking.method = "most.significant",
-                       fdr.lines = c(0.05, 0.5),
+                       fdr.lines = c(0.05, 0.5), fdr.legend = TRUE,
                        color.genes.up = "firebrick", color.genes.dn = "darkblue",
                        color.background.up = rgb(1,0,0,0.2), color.background.dn = rgb(0,0,1,0.2),
                        ylim = NULL,
@@ -110,6 +111,24 @@ genesetplot = function(ests, pvals, names, genesets,
   ## draw the plot:
   bp = barplot(means, xaxt = "n", ylab = "-log10(p-value)", main = "", col = 0, border = F, ylim = ylim) #col = rgb(0,0,0,0.4),
 
+  # add FDR lines:
+  if (length(fdr.lines) > 0){
+    # get FDRs if not provided:
+    if (length(fdrs) == 0){
+      fdrs = p.adjust(pvals, "BH")
+    }
+    # calculate the positions of the FDR lines:
+    fdr.line.positions = c()
+    fdr.lines = fdr.lines[order(fdr.lines)]
+    for (i in 1:length(fdr.lines)){
+      fdr.line.positions[i] = suppressWarnings(-log10(max(pvals[fdrs < fdr.lines[i]])))
+    }
+    # add the FDR cutoff lines
+    for (i in 1:length(fdr.line.positions)){
+      abline(h = fdr.line.positions[i], lty = 1+i, col = "grey20")
+    }
+  }
+
   # draw boxes for mean -log10pvals in up vs. down genes:
   boxwidth = (bp[2] - bp[1]) / 2
   # draw alternating background boxes:
@@ -134,4 +153,8 @@ genesetplot = function(ests, pvals, names, genesets,
          col = c(color.genes.dn, color.genes.up)[1 + (ests[tempgenes] > 0)])
   }
   axis(1, at = bp, show, las = 2)
+  # add fdr lines legend:
+  if (fdr.legend & (length(fdr.lines)>0)){
+    legend("bottomleft", lty = 1 + (1:length(fdr.lines)), legend = paste0("FDR = ", fdr.lines))
+  }
 }
