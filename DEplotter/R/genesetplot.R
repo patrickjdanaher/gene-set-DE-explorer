@@ -25,6 +25,7 @@
 #' @param color.background.up The color of background bars showing mean -log10 p-values of up-regulated genesets
 #' @param color.background.dn The color of background bars showing mean -log10 p-values of down-regulated genesets
 #' @param cex.genenames The size of the genenames in the plot
+#' @param cex.genesetnames The size of the genesetnames in the horizontal axis labels
 #' @param cex.legend The size of the legend showing FDR values
 #' @param bottom.margin If not NULL, par()$mar will be reset to this.
 #' @param show.names.top.N Only used in the volcano plot. An integer: show the gene names for the
@@ -44,7 +45,8 @@ genesetplot = function(ests, pvals, fdrs = NULL, names, genesets,
                        fdr.lines = c(0.05, 0.5), fdr.legend = TRUE,
                        color.genes.up = "firebrick", color.genes.dn = "darkblue",
                        color.background.up = rgb(1,0,0,0.2), color.background.dn = rgb(0,0,1,0.2),
-                       ylim = NULL, cex.points = 0.5, cex.genenames = 0.7, cex.legend = 0.5, bottom.margin = 12,
+                       ylim = NULL, cex.points = 0.5, cex.genenames = 0.7, cex.genesetnames = 0.6,
+                       cex.legend = 0.5, bottom.margin = 12,
                        show.names.top.N = 100, show.names.pval.thresh = NULL,
                        show.names.fdr.thresh = NULL,xlab = "Estimate"){
   ## name ests and pvals with gene names:
@@ -156,9 +158,11 @@ genesetplot = function(ests, pvals, fdrs = NULL, names, genesets,
   }
 
   # draw the geneset plot:
-  bp = barplot(means, xaxt = "n", ylab = "-log10(p-value)", main = "", col = 0,
-               border = F, ylim = ylim, axes = !draw.volcano)
-
+  #bp = barplot(means, xaxt = "n", ylab = "-log10(p-value)", main = "", col = 0,
+  #             border = F, ylim = ylim, axes = !draw.volcano
+  plot(means, xaxt = "n", ylab = "-log10(p-value)", main = "", col = 0,
+         ylim = ylim, yaxt = 'n', xlab = "")
+  bp = 1:length(means)
   # add FDR lines:
   if (length(fdr.lines) > 0){
     # get FDRs if not provided:
@@ -200,7 +204,12 @@ genesetplot = function(ests, pvals, fdrs = NULL, names, genesets,
     text(rep(bp[i], length(tempgenes)), -log10(pvals[tempgenes]), tempgenes, cex = cex.genenames,
          col = c(color.genes.dn, color.genes.up)[1 + (ests[tempgenes] > 0)])
   }
-  axis(1, at = bp, show, las = 2)
+  # draw a y-axis if the volcano plot hasn't been drawn:
+  if (!draw.volcano){
+    axis(2)
+  }
+  # draw the x-axis, the geneset names:
+  axis(1, at = bp, show, las = 2, cex.axis = cex.genesetnames)
   # add fdr lines legend:
   if (fdr.legend & (length(fdr.lines)>0)){
     legend("bottomleft", lty = 1 + (1:length(fdr.lines)), legend = paste0("FDR = ", fdr.lines))
