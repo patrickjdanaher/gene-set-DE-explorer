@@ -96,27 +96,28 @@ genesetplot = function(ests, pvals, names, genesets,
       ylim = c(0, -log10(min(temp, na.rm = T)))
     }
   }
-  ## draw the plot:
-  bp = barplot(rep(0, length(show)), xaxt = "n", ylab = "-log10(p-value)", main = "", col = 0, ylim = ylim)
   # for each geneset, calculate the mean -log10(pval) of the negative and positive genes
-  means.neg = means.pos = c()
+  means = means.neg = means.pos = c()
   for (name in show){
     tempgenes = genesets[[name]]
     tempgenes.neg = tempgenes[ests[tempgenes] < 0]
     tempgenes.pos = tempgenes[ests[tempgenes] > 0]
+    means[name] = mean(-log10(pvals[tempgenes]))
     means.neg[name] = mean(-log10(pvals[tempgenes.neg]))
     means.pos[name] = mean(-log10(pvals[tempgenes.pos]))
   }
+  ## draw the plot:
+  bp = barplot(means, xaxt = "n", ylab = "-log10(p-value)", main = "", col = rgb(0,0,0,0.4), border = F, ylim = ylim)
   # draw boxes for mean -log10pvals in up vs. down genes:
   boxwidth = (bp[2] - bp[1]) / 2
-  for (i in 1:length(show)){
-    if(means.pos[i] > means.neg[i]){
-      rect(bp[i] - boxwidth, means.neg[i], bp[i] + boxwidth, means.pos[i], col = color.background.up, border = F)
-    }
-    if(means.pos[i] < means.neg[i]){
-      rect(bp[i] - boxwidth, means.pos[i], bp[i] + boxwidth, means.neg[i], col = color.background.dn, border = F)
-    }
-  }
+  #for (i in 1:length(show)){
+  #  if(means.pos[i] > means.neg[i]){
+  #    rect(bp[i] - boxwidth, means.neg[i], bp[i] + boxwidth, means.pos[i], col = color.background.up, border = F)
+  #  }
+  #  if(means.pos[i] < means.neg[i]){
+  #    rect(bp[i] - boxwidth, means.pos[i], bp[i] + boxwidth, means.neg[i], col = color.background.dn, border = F)
+  #  }
+  #}
   # draw gene names:
   for (i in 1:length(show)){
     name = show[i]
