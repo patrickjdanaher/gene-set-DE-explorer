@@ -12,14 +12,15 @@ volcplot(ests, pvals, names = names,fdrs = fdrs,
 
 
 ## load gene sets:
-
+gsets = parsegenesetfile("c2.all.v6.2.symbols.gmt")
+gs2 = parsegenesetfile("c2.cp.biocarta.v6.2.symbols.gmt.txt")
 
 
 
 
 ## run gene set plot:
-genesetplot(ests, pvals, names, genesets,
-            n.genesets = 10, min.geneset.size = 5, min.geneset.coverage = 0.3, 
+genesetplot(ests, pvals, names, genesets = gsets,
+            n.genesets = 10, min.geneset.size = 5, min.geneset.coverage = 0.1, 
             mandatory.genesets = NULL, geneset.ranking.method = "most.significant",
             fdr.lines = c(0.05, 0.5),
             color.genes.up = "firebrick", color.genes.dn = "darkblue", 

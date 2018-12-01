@@ -1,10 +1,10 @@
 #' Parse a gene set file into a gene set object.
 #'
-#' This function takes a gene set file like those output by msigdb and modifies it into a 2 column mapping of 
+#' This function takes a gene set file like those output by msigdb and modifies it into a 2 column mapping of
 #' pathways to their component genes
 #'
 #' @param filename The filename of a gene set file ala those output by MSigDB
-#' @return A 2-column data frame of gene sets and their member genes 
+#' @return A 2-column data frame of gene sets and their member genes
 #' @export
 parsegenesetfile = function(filename){
   ## load in file
@@ -19,22 +19,22 @@ parsegenesetfile = function(filename){
     temp = temp[, -2, drop = F]
   }
   temp = t(temp)
-  
+
   ## assemble the object for use in plotting, a list of genesets:
   genesets = list()
   for (i in 1:ncol(temp)){
     gsname = temp[1, i]
     genesets[[gsname]] = unique(setdiff(as.vector(temp[-1, i]), ""))
   }
-  
+
   return(genesets)
 }
-                    
+
 
 #infile = "c2.all.v6.2.symbols.gmt"
 
 
 
 intersectgenesetswithdata = function(genesets, genenames){
-  
+
 }

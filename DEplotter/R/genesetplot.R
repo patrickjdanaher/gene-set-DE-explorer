@@ -1,11 +1,11 @@
 #' Draw a geneset plot given p-values and gene set membership.
 #'
-#' This function draws a gene set plot given differential expression results. 
-#' Options are given to control how gene sets are included. 
+#' This function draws a gene set plot given differential expression results.
+#' Options are given to control how gene sets are included.
 #'
 #' @param ests A vector of parameter estimates for each gene
 #' @param pvals A vector of the p-values from each gene
-#' @param names A vector 
+#' @param names A vector
 #' @param genesets A list of genesets. Each entry's name is a gene set name, and each entry is a character vector of gene names.
 #'                 Defaults to KEGG pathways, which is loaded with the package.
 #' @param n.genesets How many genesets to show
@@ -20,16 +20,16 @@
 #' @param color.background.up The color of background bars showing mean -log10 p-values of up-regulated genesets
 #' @param color.background.dn The color of background bars showing mean -log10 p-values of down-regulated genesets
 #' @param cex.genenames The size of the genenames in the plot
-#' 
-#' @return A plot of gene sets. 
+#'
+#' @return A plot of gene sets.
 #' @export
 genesetplot = function(ests, pvals, names, genesets,
-                       n.genesets = 10, min.geneset.size = 5, min.geneset.coverage = 0.3, 
+                       n.genesets = 10, min.geneset.size = 5, min.geneset.coverage = 0.3,
                        mandatory.genesets = NULL, geneset.ranking.method = "most.significant",
                        fdr.lines = c(0.05, 0.5),
-                       color.genes.up = "firebrick", color.genes.dn = "darkblue", 
+                       color.genes.up = "firebrick", color.genes.dn = "darkblue",
                        color.background.up = rgb(1,0,0,0.2), color.background.dn = rgb(0,0,1,0.2),
-                       xlab = "Estimate", ylim = NULL, 
+                       ylim = NULL,
                        cex.points = 0.5, cex.genenames = 0.5, cex.legend = 0.5, ...){
   ## name ests and pvals with gene names:
   if (length(names) > 0){
@@ -44,7 +44,7 @@ genesetplot = function(ests, pvals, names, genesets,
     # only keep the intersection:
     genesets[[gsname]] = intersect(genesets[[gsname]], names)
   }
-  
+
   ## exclude genesets with insufficient genes
   for (gsname in setdiff(names(genesets), mandatory.genesets)){
     # exclude genesets with too little intersection with data:
@@ -52,7 +52,7 @@ genesetplot = function(ests, pvals, names, genesets,
       genesets[[gsname]] = NULL
     }
   }
-  
+
   ## choose which genesets to plot:
   scores = c()
   if (geneset.ranking.method == "most.significant"){
@@ -82,11 +82,11 @@ genesetplot = function(ests, pvals, names, genesets,
     # score each geneset by whichever is more impressive: its rank in the up-regulated scores or among the dn-regulated scores
     scores = apply(cbind(rank(upscores), rank(dnscores)), 1, max)
   }
-  
+
   ## which genesets to plot: any mandatory, plus any additional in decreasing order of score up to n.genesets
   show = c(mandatory.genesets, names(genesets)[order(scores, decreasing = T)])
-  show = show[max(length(mandatory.genesets), n.genesets)]
-  
+  show = show[1:max(length(mandatory.genesets), n.genesets)]
+
   # parse the ylim: take what's been given, or if NULL, get the range of the available ones
   if (length(ylim) == 0){
     # get all relevant pvals to find their range:
@@ -97,7 +97,7 @@ genesetplot = function(ests, pvals, names, genesets,
     }
   }
   ## draw the plot:
-  bp = barplot(rep(0, length(show)), xaxt = "n", ylab = "-log10(p-value)", main = "", col = 0, outline = 0, ylim = ylim)
+  bp = barplot(rep(0, length(show)), xaxt = "n", ylab = "-log10(p-value)", main = "", col = 0, ylim = ylim)
   # for each geneset, calculate the mean -log10(pval) of the negative and positive genes
   means.neg = means.pos = c()
   for (name in show){
@@ -110,17 +110,19 @@ genesetplot = function(ests, pvals, names, genesets,
   # draw boxes for mean -log10pvals in up vs. down genes:
   boxwidth = (bp[2] - bp[1]) / 2
   for (i in 1:length(show)){
-    if(means.pos[i] > means.beg[i]){
-      rect(bp[i] - boxwidth, means.neg[i], bp[i] + boxwidth, means.pos[i], col = color.background.up)
+    if(means.pos[i] > means.neg[i]){
+      rect(bp[i] - boxwidth, means.neg[i], bp[i] + boxwidth, means.pos[i], col = color.background.up, border = F)
     }
-    if(means.pos[i] < means.beg[i]){
-      rect(bp[i] - boxwidth, means.pos[i], bp[i] + boxwidth, means.neg[i], col = color.background.dn)
+    if(means.pos[i] < means.neg[i]){
+      rect(bp[i] - boxwidth, means.pos[i], bp[i] + boxwidth, means.neg[i], col = color.background.dn, border = F)
     }
   }
   # draw gene names:
   for (i in 1:length(show)){
+    name = show[i]
     tempgenes = genesets[[name]]
-    text(rep(bp[i], length(tempgenes)), -log10(pvals[tempgenes]), cex = cex.genenames,
+    text(rep(bp[i], length(tempgenes)), -log10(pvals[tempgenes]), tempgenes, cex = cex.genenames,
          col = c(color.genes.dn, color.genes.up)[1 + (ests[tempgenes] > 0)])
   }
+  axis(1, at = bp, show, las = 2)
 }
